@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+  </head>
+  <body>
+    <div>
+        <ul id="display-chat"></ul>
+        <form id="form-room">
+            Username: <input id="form-room__user-name-input" type="text" />
+            room: <input id="form-room__room-name-input" type="text" />
+            <button>Send</button>
+        </form>
+        <form id="form-mesasge">
+            <input id="form-mesasge__message-input" type="text" />
+            <button>send message</button>
+        </form>
+        <p id="online-rooms">س</p>
+        <p id="online-users"></p>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+        const formRoom = document.querySelector("#form-room");
+        const formMessage = document.querySelector("#form-message");
+        const message = document.querySelector("#form-mesasge__message-input");
+        const username = document.querySelector("#form-room__user-name-input");
+        const room = document.querySelector("#form-room__room-name-input");
+        const displayChat = document.querySelector("#display-chat");
+        const onlineRooms = document.querySelector("#online-rooms");
+        const onlineUsers = document.querySelector("#online-users")
+
+        function sendMessage (e) {
+            e.preventDefault();
+        }
+
+        function enterRoom (e) {
+            e.preventDefault()
+            if(username.value && room.value) {
+                socket.emit("enterRoom", {
+                    username: username.value,
+                    room: room.value
+                });
+            }
+        }
+
+        socket.on("message", (data) => {
+            console.log(data);
+            displayChat.textContent = "";
+            displayChat.innerHTML = `${data}`;
+        });
+
+        socket.on("roomList", (rooms) => {
+            onlineRooms.textContent = "";
+            onlineRooms.innerHTML = "<em>Active Rooms:</em>"
+            rooms.forEach(room => onlineRooms.textContent += `${room},`);
+        });
+
+        socket.on("userList", (users) => {
+            console.log(users);
+            onlineUsers.textContent = "";
+            onlineUsers.innerHTML = "<em>Active Users:</em>";
+            users.forEach(user => onlineUsers.textContent += `${user},`);
+        })
+        formRoom.addEventListener("submit", enterRoom);
+    </script>
+  </body>
+</html>
